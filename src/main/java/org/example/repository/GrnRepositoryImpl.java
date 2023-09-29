@@ -72,7 +72,7 @@ public class GrnRepositoryImpl implements GrnRepository {
     }
 
     public Float getStock(int productId) throws SQLException{
-        String query = "SELECT SUM(gi.qty) AS stock FROM grn_items gi, grns g WHERE g.id=gi.grn_id AND gi.product_id= ? AND gi.qty>0 AND g.is_shelf=1 GROUP BY gi.product_id";
+        String query = "SELECT SUM(gi.qty) AS stock FROM grn_items gi, grns g WHERE g.id=gi.grn_id AND gi.product_id= ? AND gi.qty>0 AND g.is_shelf=1 AND exp_date >= CURDATE() GROUP BY gi.product_id";
 
         ResultSet resultSet = queryExecutor.executeQuery(query,productId);
         if (resultSet.next()) {

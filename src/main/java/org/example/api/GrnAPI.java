@@ -103,15 +103,17 @@ public class GrnAPI extends HttpServlet {
                 .setDateFormat("yyyy-MM-d H:mm:ss") // setting date format
                 .create();
 
-        try {
-            this.grnRepositoryImpl.moveGrn(Integer.parseInt(request.getParameter("getId")));
-            response1 = new ResponseDTO("success", "");
-            out.print(gson.toJson(response1));
-            out.flush();
-        }catch(Exception er){
-            response1 = new ResponseDTO("error", er.getMessage());
-            out.print(gson.toJson(response1));
-            out.flush();
+        synchronized(this) {
+            try {
+                this.grnRepositoryImpl.moveGrn(Integer.parseInt(request.getParameter("getId")));
+                response1 = new ResponseDTO("success", "");
+                out.print(gson.toJson(response1));
+                out.flush();
+            } catch (Exception er) {
+                response1 = new ResponseDTO("error", er.getMessage());
+                out.print(gson.toJson(response1));
+                out.flush();
+            }
         }
 
     }

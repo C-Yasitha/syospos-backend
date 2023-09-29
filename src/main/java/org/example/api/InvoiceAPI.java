@@ -69,34 +69,36 @@ public class InvoiceAPI extends HttpServlet {
         }
         String requestBody = sb.toString();
 
-        try {
-            InvoiceDTO inv = gson.fromJson(requestBody, InvoiceDTO.class);
-
+        synchronized(this) {
             try {
-                //check stock before save
-                for (InvoiceItemDTO prd : inv.getProducts()) {
-                    Float stock = this.grnRepositoryImpl.getStock(prd.getProductCode());
-                    if (stock < prd.getQty()) {
-                        throw new SQLException("Stock error");
+               // Thread.sleep(8000);
+                InvoiceDTO inv = gson.fromJson(requestBody, InvoiceDTO.class);
+                try {
+                    //check stock before save
+                    for (InvoiceItemDTO prd : inv.getProducts()) {
+                        Float stock = this.grnRepositoryImpl.getStock(prd.getProductCode());
+                        if (stock < prd.getQty()) {
+                            throw new SQLException("Stock error");
+                        }
                     }
-                }
-                //stock reduce
-                this.grnRepositoryImpl.reduceStock(inv.getProducts());
-                //save invoice
-                this.invoiceRepositoryImpl.saveInvoice(inv);
+                    //stock reduce
+                    this.grnRepositoryImpl.reduceStock(inv.getProducts());
+                    //save invoice
+                    this.invoiceRepositoryImpl.saveInvoice(inv);
 
-                response1 = new ResponseDTO("success", "");
-                out.print(gson.toJson(response1));
-                out.flush();
-            } catch (SQLException er) {
-                response1 = new ResponseDTO("error", er.getMessage());
+                    response1 = new ResponseDTO("success", "");
+                    out.print(gson.toJson(response1));
+                    out.flush();
+                } catch (SQLException er) {
+                    response1 = new ResponseDTO("error", er.getMessage());
+                    out.print(gson.toJson(response1));
+                    out.flush();
+                }
+            } catch (Exception e) {
+                response1 = new ResponseDTO("error", e.getMessage());
                 out.print(gson.toJson(response1));
                 out.flush();
             }
-        }catch(Exception e){
-            response1 = new ResponseDTO("error", e.getMessage());
-            out.print(gson.toJson(response1));
-            out.flush();
         }
     }
 }
