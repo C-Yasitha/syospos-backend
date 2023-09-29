@@ -57,4 +57,15 @@
         <url-pattern>/invoice</url-pattern>
     </servlet-mapping>
 
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>ReportAPI</servlet-name>
+        <servlet-class>org.example.api.ReportAPI</servlet-class>
+    </servlet>
+    <!-- Servlet Mappings -->
+    <servlet-mapping>
+        <servlet-name>ReportAPI</servlet-name>
+        <url-pattern>/report</url-pattern>
+    </servlet-mapping>
+
 </web-app>
