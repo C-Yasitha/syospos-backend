@@ -34,9 +34,8 @@ public class GrnAPI extends HttpServlet {
                 .setDateFormat("yyyy-MM-d H:mm:ss") // setting date format
                 .create();
 
-        List<GrnDTO> grnList;
-
         try {
+            List<GrnDTO> grnList;
             grnList = this.grnRepositoryImpl.getAllGrns();
             ResponseDTO response1 = new ResponseDTO("success",gson.toJson(grnList));
             out.print(gson.toJson(response1));
@@ -74,15 +73,21 @@ public class GrnAPI extends HttpServlet {
         }
         String requestBody = sb.toString();
 
-        GrnDTO grn = gson.fromJson(requestBody, GrnDTO.class);
-
         try {
-            this.grnRepositoryImpl.saveGrn(grn);
-            response1 = new ResponseDTO("success","");
-            out.print(gson.toJson(response1));
-            out.flush();
-        }catch(SQLException er){
-            response1 = new ResponseDTO("error",er.getMessage());
+            GrnDTO grn = gson.fromJson(requestBody, GrnDTO.class);
+
+            try {
+                this.grnRepositoryImpl.saveGrn(grn);
+                response1 = new ResponseDTO("success", "");
+                out.print(gson.toJson(response1));
+                out.flush();
+            }catch (SQLException er) {
+                response1 = new ResponseDTO("error", er.getMessage());
+                out.print(gson.toJson(response1));
+                out.flush();
+            }
+        }catch(Exception e){
+            response1 = new ResponseDTO("error", e.getMessage());
             out.print(gson.toJson(response1));
             out.flush();
         }
@@ -103,7 +108,7 @@ public class GrnAPI extends HttpServlet {
             response1 = new ResponseDTO("success", "");
             out.print(gson.toJson(response1));
             out.flush();
-        }catch(SQLException er){
+        }catch(Exception er){
             response1 = new ResponseDTO("error", er.getMessage());
             out.print(gson.toJson(response1));
             out.flush();

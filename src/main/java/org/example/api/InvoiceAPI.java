@@ -2,10 +2,7 @@ package org.example.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.example.dto.GrnDTO;
-import org.example.dto.InvoiceDTO;
-import org.example.dto.ProductDTO;
-import org.example.dto.ResponseDTO;
+import org.example.dto.*;
 import org.example.repository.GrnRepositoryImpl;
 import org.example.repository.InvoiceRepositoryImpl;
 
@@ -72,19 +69,32 @@ public class InvoiceAPI extends HttpServlet {
         }
         String requestBody = sb.toString();
 
-        InvoiceDTO inv = gson.fromJson(requestBody, InvoiceDTO.class);
-
         try {
-            //stock reduce
-            this.grnRepositoryImpl.reduceStock(inv.getProducts());
-            //save invoice
-            this.invoiceRepositoryImpl.saveInvoice(inv);
+            InvoiceDTO inv = gson.fromJson(requestBody, InvoiceDTO.class);
 
-            response1 = new ResponseDTO("success", "");
-            out.print(gson.toJson(response1));
-            out.flush();
-        }catch(SQLException er){
-            response1 = new ResponseDTO("error", er.getMessage());
+            try {
+                //check stock before save
+                for (InvoiceItemDTO prd : inv.getProducts()) {
+                    Float stock = this.grnRepositoryImpl.getStock(prd.getProductCode());
+                    if (stock < prd.getQty()) {
+                        throw new SQLException("Stock error");
+                    }
+                }
+                //stock reduce
+                this.grnRepositoryImpl.reduceStock(inv.getProducts());
+                //save invoice
+                this.invoiceRepositoryImpl.saveInvoice(inv);
+
+                response1 = new ResponseDTO("success", "");
+                out.print(gson.toJson(response1));
+                out.flush();
+            } catch (SQLException er) {
+                response1 = new ResponseDTO("error", er.getMessage());
+                out.print(gson.toJson(response1));
+                out.flush();
+            }
+        }catch(Exception e){
+            response1 = new ResponseDTO("error", e.getMessage());
             out.print(gson.toJson(response1));
             out.flush();
         }

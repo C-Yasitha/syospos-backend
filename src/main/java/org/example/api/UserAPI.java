@@ -42,16 +42,21 @@ public class UserAPI extends HttpServlet {
         }
         String requestBody = sb.toString();
 
-        User user = gson.fromJson(requestBody, User.class);
         try {
-            boolean auth = this.userRepositoryImpl.authenticateUser(user);
-            if(auth){
-                response1 = new ResponseDTO("success","true");
-            }else{
-                response1 = new ResponseDTO("success","false");
+            User user = gson.fromJson(requestBody, User.class);
+            try {
+                boolean auth = this.userRepositoryImpl.authenticateUser(user);
+                if (auth) {
+                    response1 = new ResponseDTO("success", "true");
+                } else {
+                    response1 = new ResponseDTO("success", "false");
+                }
+            } catch (SQLException er) {
+                response1 = new ResponseDTO("error", er.getMessage());
             }
-        }catch(SQLException er){
-            response1 = new ResponseDTO("error",er.getMessage());
+
+        }catch(Exception er){
+            response1 = new ResponseDTO("error", er.getMessage());
         }
 
         out.print(gson.toJson(response1));

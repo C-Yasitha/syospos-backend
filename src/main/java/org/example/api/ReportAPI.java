@@ -31,40 +31,47 @@ public class ReportAPI extends HttpServlet {
                 .setDateFormat("yyyy-MM-d H:mm:ss") // setting date format
                 .create();
 
-        String report =  request.getParameter("report");
-        String date =  request.getParameter("date");
+        try {
+            String report = request.getParameter("report");
+            String date = request.getParameter("date");
 
-        switch (report){
-            case "TotalSale":
-                List<InvoiceItemDTO> invoiceItemDTOS = this.invoiceRepositoryImpl.getTotalSale(date);
-                String outPut = " <table>\n" ;
-                Float totalQty = 0.00F;
-                Float totalPrice = 0.00F;
-                for (InvoiceItemDTO invoiceItemDTO : invoiceItemDTOS){
-                    outPut +=  "        <tr>\n" +
-                            "            <th>"+invoiceItemDTO.getProductName()+"</th>\n" +
-                            "            <th>"+invoiceItemDTO.getProductCode()+"</th>\n" +
-                            "            <th>"+invoiceItemDTO.getQty()+"</th>\n" +
-                            "            <th>"+invoiceItemDTO.getPrice()+"</th>\n" +
-                            "        </tr>\n" ;
-                    totalQty += invoiceItemDTO.getQty();
-                    totalPrice += invoiceItemDTO.getPrice();
-                }
+            switch (report) {
+                case "TotalSale":
+                    List<InvoiceItemDTO> invoiceItemDTOS = this.invoiceRepositoryImpl.getTotalSale(date);
+                    String outPut = " <table>\n";
+                    Float totalQty = 0.00F;
+                    Float totalPrice = 0.00F;
+                    for (InvoiceItemDTO invoiceItemDTO : invoiceItemDTOS) {
+                        outPut += "        <tr>\n" +
+                                "            <th>" + invoiceItemDTO.getProductName() + "</th>\n" +
+                                "            <th>" + invoiceItemDTO.getProductCode() + "</th>\n" +
+                                "            <th>" + invoiceItemDTO.getQty() + "</th>\n" +
+                                "            <th>" + invoiceItemDTO.getPrice() + "</th>\n" +
+                                "        </tr>\n";
+                        totalQty += invoiceItemDTO.getQty();
+                        totalPrice += invoiceItemDTO.getPrice();
+                    }
 
-                outPut += "    </table>\n"+
-                        "    <h3>Total Quantity: "+totalQty+"</h3>\n" +
-                        "    <h3>Total Revenue: "+totalPrice+"</h3>\n";
+                    outPut += "    </table>\n" +
+                            "    <h3>Total Quantity: " + totalQty + "</h3>\n" +
+                            "    <h3>Total Revenue: " + totalPrice + "</h3>\n";
 
-                response1 = new ResponseDTO("success",outPut);
-                out.print(gson.toJson(response1));
-                out.flush();
+                    response1 = new ResponseDTO("success", outPut);
+                    out.print(gson.toJson(response1));
+                    out.flush();
 
-                break;
+                    break;
 
-            default:
-                response1 = new ResponseDTO("error","report not found");
-                out.print(gson.toJson(response1));
-                out.flush();
+                default:
+                    response1 = new ResponseDTO("error", "report not found");
+                    out.print(gson.toJson(response1));
+                    out.flush();
+            }
+
+        }catch(Exception e){
+            response1 = new ResponseDTO("error", "report parameters are invalid");
+            out.print(gson.toJson(response1));
+            out.flush();
         }
     }
 }

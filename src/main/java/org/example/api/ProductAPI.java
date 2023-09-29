@@ -55,7 +55,7 @@ public class ProductAPI extends HttpServlet {
 
             out.print(gson.toJson(response1));
             out.flush();
-        }catch(SQLException er){
+        }catch(Exception er){
             response1 = new ResponseDTO("error", er.getMessage());
             out.print(gson.toJson(response1));
             out.flush();
@@ -84,15 +84,21 @@ public class ProductAPI extends HttpServlet {
         }
         String requestBody = sb.toString();
 
-        ProductDTO prd = gson.fromJson(requestBody, ProductDTO.class);
         try {
-            this.productRepositoryImpl.saveProduct(prd);
+            ProductDTO prd = gson.fromJson(requestBody, ProductDTO.class);
+            try {
+                this.productRepositoryImpl.saveProduct(prd);
 
-            response1 = new ResponseDTO("success", "");
-            out.print(gson.toJson(response1));
-            out.flush();
-        }catch(SQLException er){
-            response1 = new ResponseDTO("error", er.getMessage());
+                response1 = new ResponseDTO("success", "");
+                out.print(gson.toJson(response1));
+                out.flush();
+            } catch (SQLException er) {
+                response1 = new ResponseDTO("error", er.getMessage());
+                out.print(gson.toJson(response1));
+                out.flush();
+            }
+        }catch(Exception e){
+            response1 = new ResponseDTO("error", e.getMessage());
             out.print(gson.toJson(response1));
             out.flush();
         }
@@ -119,16 +125,22 @@ public class ProductAPI extends HttpServlet {
         }
         String requestBody = sb.toString();
 
-        ProductDTO prd = gson.fromJson(requestBody, ProductDTO.class);
-
         try {
-            this.productRepositoryImpl.updateProduct(prd);
+            ProductDTO prd = gson.fromJson(requestBody, ProductDTO.class);
 
-            response1 = new ResponseDTO("success", "");
-            out.print(gson.toJson(response1));
-            out.flush();
-        }catch(SQLException er){
-            response1 = new ResponseDTO("error", er.getMessage());
+            try {
+                this.productRepositoryImpl.updateProduct(prd);
+
+                response1 = new ResponseDTO("success", "");
+                out.print(gson.toJson(response1));
+                out.flush();
+            } catch (SQLException er) {
+                response1 = new ResponseDTO("error", er.getMessage());
+                out.print(gson.toJson(response1));
+                out.flush();
+            }
+        }catch(Exception e){
+            response1 = new ResponseDTO("error", e.getMessage());
             out.print(gson.toJson(response1));
             out.flush();
         }
@@ -145,7 +157,7 @@ public class ProductAPI extends HttpServlet {
             response1 = new ResponseDTO("success", "");
             out.print(gson.toJson(response1));
             out.flush();
-        }catch (SQLException er){
+        }catch (Exception er){
             response1 = new ResponseDTO("error", er.getMessage());
             out.print(gson.toJson(response1));
             out.flush();
