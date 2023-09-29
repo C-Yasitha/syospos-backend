@@ -18,105 +18,89 @@ public class ProductRepositoryImpl implements ProductRepository {
         queryExecutor = new DatabaseQueryExecutor();
     }
 
-    public List<ProductDTO> getAllProducts() {
+    public List<ProductDTO> getAllProducts() throws SQLException {
         List<ProductDTO> products = new ArrayList<>();
         String query = "SELECT * FROM products";
-        try {
-            ResultSet resultSet = queryExecutor.executeQuery(query);
-            while (resultSet.next()) {
-                String productCode = resultSet.getString("product_code");
-                String productName = resultSet.getString("product_name");
-                String productDescription = resultSet.getString("product_description");
-                String productImage = resultSet.getString("product_image");
-                int lowLevel = resultSet.getInt("low_level");
-                boolean isService = resultSet.getBoolean("is_service");
-                double productWeight = resultSet.getDouble("product_weight");
-                Date createdAt = resultSet.getDate("created_at");
-                Date updatedAt = resultSet.getDate("updated_at");
-                Float price = resultSet.getFloat("price");
-                String category = resultSet.getString("category");
-                String brand = resultSet.getString("brand");
 
-                ProductDTO product = new ProductDTO(productCode, productName, productDescription, productImage, lowLevel, isService,
-                        productWeight, createdAt, updatedAt, category, brand, price);
+        ResultSet resultSet = queryExecutor.executeQuery(query);
+        while (resultSet.next()) {
+            String productCode = resultSet.getString("product_code");
+            String productName = resultSet.getString("product_name");
+            String productDescription = resultSet.getString("product_description");
+            String productImage = resultSet.getString("product_image");
+            int lowLevel = resultSet.getInt("low_level");
+            boolean isService = resultSet.getBoolean("is_service");
+            double productWeight = resultSet.getDouble("product_weight");
+            Date createdAt = resultSet.getDate("created_at");
+            Date updatedAt = resultSet.getDate("updated_at");
+            Float price = resultSet.getFloat("price");
+            String category = resultSet.getString("category");
+            String brand = resultSet.getString("brand");
 
-                products.add(product);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
+            ProductDTO product = new ProductDTO(productCode, productName, productDescription, productImage, lowLevel, isService,
+                    productWeight, createdAt, updatedAt, category, brand, price);
+
+            products.add(product);
         }
+
         return products;
     }
 
-    public void saveProduct(ProductDTO product) {
+    public void saveProduct(ProductDTO product) throws SQLException {
         String query = "INSERT INTO products (product_code, product_name, product_description, product_image, low_level, is_service, " +
                 "product_weight, category, brand, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try {
-            queryExecutor.executeUpdate(query, product.getProductCode(), product.getProductName(), product.getProductDescription(),
-                    product.getProductImage(), product.getLowLevel(), product.isService(), product.getProductWeight(),
-                    product.getCategory(),
-                    product.getBrand(), product.getPrice());
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
-        }
+
+        queryExecutor.executeUpdate(query, product.getProductCode(), product.getProductName(), product.getProductDescription(),
+                product.getProductImage(), product.getLowLevel(), product.isService(), product.getProductWeight(),
+                product.getCategory(),
+                product.getBrand(), product.getPrice());
+
     }
 
-    public Product getProductByCode(String code){
+    public Product getProductByCode(String code) throws SQLException{
         String query = "SELECT * FROM products WHERE product_code= ? ";
-        try {
-            ResultSet resultSet = queryExecutor.executeQuery(query,code);
-            if (resultSet.next()) {
-                String productCode = resultSet.getString("product_code");
-                String productName = resultSet.getString("product_name");
-                String productDescription = resultSet.getString("product_description");
-                String productImage = resultSet.getString("product_image");
-                int lowLevel = resultSet.getInt("low_level");
-                boolean isService = resultSet.getBoolean("is_service");
-                double productWeight = resultSet.getDouble("product_weight");
-                Date createdAt = resultSet.getDate("created_at");
-                Date updatedAt = resultSet.getDate("updated_at");
-                Float price = resultSet.getFloat("price");
-                String category = resultSet.getString("category");
-                String brand = resultSet.getString("brand");
-                Product selectedProduct = new Product(productCode, productName, productDescription, productImage, lowLevel, isService,
-                        productWeight, createdAt, updatedAt, category, brand, price);
-                selectedProduct.setId(resultSet.getInt("id"));
 
-                return selectedProduct;
-            }else{
-                return null;
-            }
-        }catch (SQLException e) {
-            e.printStackTrace();
+        ResultSet resultSet = queryExecutor.executeQuery(query,code);
+        if (resultSet.next()) {
+            String productCode = resultSet.getString("product_code");
+            String productName = resultSet.getString("product_name");
+            String productDescription = resultSet.getString("product_description");
+            String productImage = resultSet.getString("product_image");
+            int lowLevel = resultSet.getInt("low_level");
+            boolean isService = resultSet.getBoolean("is_service");
+            double productWeight = resultSet.getDouble("product_weight");
+            Date createdAt = resultSet.getDate("created_at");
+            Date updatedAt = resultSet.getDate("updated_at");
+            Float price = resultSet.getFloat("price");
+            String category = resultSet.getString("category");
+            String brand = resultSet.getString("brand");
+            Product selectedProduct = new Product(productCode, productName, productDescription, productImage, lowLevel, isService,
+                    productWeight, createdAt, updatedAt, category, brand, price);
+            selectedProduct.setId(resultSet.getInt("id"));
+
+            return selectedProduct;
+        }else{
             return null;
-            // Handle the exception according to your application's error handling mechanism
         }
+
     }
 
-    public void updateProduct(ProductDTO product) {
+    public void updateProduct(ProductDTO product) throws SQLException {
         String query = "UPDATE products SET product_code = ?, product_name = ?, product_description = ?, product_image = ?, " +
                 "low_level = ?, is_service = ?, product_weight = ?," +
                 "category = ?, brand = ?, price = ? WHERE product_code = ?";
-        try {
-            queryExecutor.executeUpdate(query, product.getProductCode(), product.getProductName(), product.getProductDescription(),
-                    product.getProductImage(), product.getLowLevel(), product.isService(), product.getProductWeight(),
-                    product.getCategory(),
-                    product.getBrand(), product.getPrice(), product.getProductCode());
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
-        }
+
+        queryExecutor.executeUpdate(query, product.getProductCode(), product.getProductName(), product.getProductDescription(),
+                product.getProductImage(), product.getLowLevel(), product.isService(), product.getProductWeight(),
+                product.getCategory(),
+                product.getBrand(), product.getPrice(), product.getProductCode());
+
     }
 
-    public void deleteProduct(String productCode) {
+    public void deleteProduct(String productCode) throws SQLException {
         String query = "DELETE FROM products WHERE product_code = ?";
-        try {
-            queryExecutor.executeUpdate(query, productCode);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
-        }
+
+        queryExecutor.executeUpdate(query, productCode);
+
     }
 }

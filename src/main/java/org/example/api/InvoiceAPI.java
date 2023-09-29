@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
 
 public class InvoiceAPI extends HttpServlet {
@@ -33,16 +34,21 @@ public class InvoiceAPI extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
-
-        List<InvoiceDTO> invList = this.invoiceRepositoryImpl.getAllInvoices();
-
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-d H:mm:ss") // setting date format
                 .create();
 
-        ResponseDTO response1 = new ResponseDTO("success",gson.toJson(invList));
-        out.print(gson.toJson(response1));
-        out.flush();
+        try {
+            List<InvoiceDTO> invList = this.invoiceRepositoryImpl.getAllInvoices();
+
+            ResponseDTO response1 = new ResponseDTO("success", gson.toJson(invList));
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch(SQLException er){
+            ResponseDTO response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
+        }
     }
 
     @Override
@@ -68,13 +74,19 @@ public class InvoiceAPI extends HttpServlet {
 
         InvoiceDTO inv = gson.fromJson(requestBody, InvoiceDTO.class);
 
-        //stock reduce
-        this.grnRepositoryImpl.reduceStock(inv.getProducts());
-        //save invoice
-        this.invoiceRepositoryImpl.saveInvoice(inv);
+        try {
+            //stock reduce
+            this.grnRepositoryImpl.reduceStock(inv.getProducts());
+            //save invoice
+            this.invoiceRepositoryImpl.saveInvoice(inv);
 
-        response1 = new ResponseDTO("success","");
-        out.print(gson.toJson(response1));
-        out.flush();
+            response1 = new ResponseDTO("success", "");
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch(SQLException er){
+            response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
+        }
     }
 }

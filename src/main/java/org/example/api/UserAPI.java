@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 public class UserAPI extends HttpServlet {
     private UserRepositoryImpl userRepositoryImpl;
@@ -42,12 +43,15 @@ public class UserAPI extends HttpServlet {
         String requestBody = sb.toString();
 
         User user = gson.fromJson(requestBody, User.class);
-        boolean auth = this.userRepositoryImpl.authenticateUser(user);
-       // boolean auth = true;
-        if(auth){
-            response1 = new ResponseDTO("success","true");
-        }else{
-            response1 = new ResponseDTO("error","false");
+        try {
+            boolean auth = this.userRepositoryImpl.authenticateUser(user);
+            if(auth){
+                response1 = new ResponseDTO("success","true");
+            }else{
+                response1 = new ResponseDTO("success","false");
+            }
+        }catch(SQLException er){
+            response1 = new ResponseDTO("error",er.getMessage());
         }
 
         out.print(gson.toJson(response1));

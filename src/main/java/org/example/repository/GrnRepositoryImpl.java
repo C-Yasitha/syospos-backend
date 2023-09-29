@@ -19,35 +19,25 @@ public class GrnRepositoryImpl implements GrnRepository {
         queryExecutor = new DatabaseQueryExecutor();
     }
 
-    public void saveGrn(GrnDTO grn) {
+    public void saveGrn(GrnDTO grn) throws SQLException {
         //save grn first
         int returnId = 0;
         String query = "INSERT INTO grns (grn_date, supplier_name, total, is_shelf) VALUES (?, ?, ?, ?)";
-        try {
-            returnId = queryExecutor.executeUpdate(query,grn.getGrnDate(),grn.getSupplierName(),grn.getTotal(),grn.isShelf());
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
-        }
+        returnId = queryExecutor.executeUpdate(query,grn.getGrnDate(),grn.getSupplierName(),grn.getTotal(),grn.isShelf());
+
         //save grn items
         if(returnId!=0){
             for (GrnItemDTO grnItems:grn.getGrnItems()) {
                 String queryItem = "INSERT INTO grn_items (grn_id, product_id, product_name, exp_date, qty, cost) VALUES (?, ?, ?, ?, ?, ?)";
-                try {
-                   queryExecutor.executeUpdate(queryItem,returnId,grnItems.getProductId(),grnItems.getProductName(),grnItems.getExpDate(),grnItems.getQty(),grnItems.getCost());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    // Handle the exception according to your application's error handling mechanism
-                }
+                queryExecutor.executeUpdate(queryItem,returnId,grnItems.getProductId(),grnItems.getProductName(),grnItems.getExpDate(),grnItems.getQty(),grnItems.getCost());
             }
         }
     }
 
 
-    public List<GrnDTO> getAllGrns() {
+    public List<GrnDTO> getAllGrns() throws SQLException {
         List<GrnDTO> grns = new ArrayList<>();
         String query = "SELECT * FROM grns";
-        try {
             ResultSet resultSet = queryExecutor.executeQuery(query);
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
@@ -73,40 +63,27 @@ public class GrnRepositoryImpl implements GrnRepository {
 
                 grns.add(grnDTO);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
-        }
         return grns;
     }
 
-    public void moveGrn(int id){
+    public void moveGrn(int id) throws SQLException{
         String query = "UPDATE grns SET is_shelf = !is_shelf WHERE id = ?";
-        try {
-            queryExecutor.executeUpdate(query,id);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's error handling mechanism
-        }
+        queryExecutor.executeUpdate(query,id);
     }
 
-    public Float getStock(int productId){
+    public Float getStock(int productId) throws SQLException{
         String query = "SELECT SUM(gi.qty) AS stock FROM grn_items gi, grns g WHERE g.id=gi.grn_id AND gi.product_id= ? AND gi.qty>0 AND g.is_shelf=1 GROUP BY gi.product_id";
-        try {
-            ResultSet resultSet = queryExecutor.executeQuery(query,productId);
-            if (resultSet.next()) {
-                return resultSet.getFloat("stock");
-            }else{
-                return 0.00F;
-            }
-        }catch(SQLException e) {
-            e.printStackTrace();
+
+        ResultSet resultSet = queryExecutor.executeQuery(query,productId);
+        if (resultSet.next()) {
+            return resultSet.getFloat("stock");
+        }else{
             return 0.00F;
-            // Handle the exception according to your application's error handling mechanism
         }
+
     }
 
-    public void reduceStock(List<InvoiceItemDTO> invoiceItems){
+    public void reduceStock(List<InvoiceItemDTO> invoiceItems) throws SQLException{
 
         for (InvoiceItemDTO invoiceItemDTO : invoiceItems){
             String query = "UPDATE grn_items SET qty = CASE " +
@@ -124,12 +101,9 @@ public class GrnRepositoryImpl implements GrnRepository {
                     "    END " +
                     "END " +
                     "WHERE product_id = ? AND exp_date >= CURDATE()";
-            try {
-                queryExecutor.executeUpdate(query,invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode());
-            } catch (SQLException e) {
-                e.printStackTrace();
-                // Handle the exception according to your application's error handling mechanism sql query to reduce grn item stock for given value but reduce form latest expire date and if one row can't reduce reduce from next row
-            }
+
+            queryExecutor.executeUpdate(query,invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode(),invoiceItemDTO.getQty(),invoiceItemDTO.getQty(),invoiceItemDTO.getProductCode());
+
         }
 
     }

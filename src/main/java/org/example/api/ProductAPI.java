@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 public class ProductAPI extends HttpServlet {
 
@@ -37,22 +38,29 @@ public class ProductAPI extends HttpServlet {
                 .setDateFormat("yyyy-MM-d H:mm:ss") // setting date format
                 .create();
 
-        Product product = this.productRepositoryImpl.getProductByCode(request.getParameter("productCode"));
-        if(product!=null){
-            ProductDTO productDTO =  new ProductDTO(product.getProductCode(), product.getProductName(), product.getProductDescription(), product.getProductImage(), product.getLowLevel(), product.isService(),
-                    product.getProductWeight(), product.getCreatedAt(), product.getUpdatedAt(), product.getCategory(), product.getBrand(), product.getPrice());
-            productDTO.setId(product.getId());
-            if(request.getParameter("withStock").equals("true")){
-                //get stock
-                productDTO.setQty(this.grnRepositoryImpl.getStock(productDTO.getId()));
+        try {
+            Product product = this.productRepositoryImpl.getProductByCode(request.getParameter("productCode"));
+            if (product != null) {
+                ProductDTO productDTO = new ProductDTO(product.getProductCode(), product.getProductName(), product.getProductDescription(), product.getProductImage(), product.getLowLevel(), product.isService(),
+                        product.getProductWeight(), product.getCreatedAt(), product.getUpdatedAt(), product.getCategory(), product.getBrand(), product.getPrice());
+                productDTO.setId(product.getId());
+                if (request.getParameter("withStock").equals("true")) {
+                    //get stock
+                    productDTO.setQty(this.grnRepositoryImpl.getStock(productDTO.getId()));
+                }
+                response1 = new ResponseDTO("success", gson.toJson(productDTO));
+            } else {
+                response1 = new ResponseDTO("error", "no products found for that code");
             }
-            response1 = new ResponseDTO("success",gson.toJson(productDTO));
-        }else{
-            response1 = new ResponseDTO("error","");
+
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch(SQLException er){
+            response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
         }
 
-        out.print(gson.toJson(response1));
-        out.flush();
     }
 
     @Override
@@ -77,12 +85,17 @@ public class ProductAPI extends HttpServlet {
         String requestBody = sb.toString();
 
         ProductDTO prd = gson.fromJson(requestBody, ProductDTO.class);
+        try {
+            this.productRepositoryImpl.saveProduct(prd);
 
-        this.productRepositoryImpl.saveProduct(prd);
-
-        response1 = new ResponseDTO("success","");
-        out.print(gson.toJson(response1));
-        out.flush();
+            response1 = new ResponseDTO("success", "");
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch(SQLException er){
+            response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
+        }
     }
 
     @Override
@@ -108,11 +121,17 @@ public class ProductAPI extends HttpServlet {
 
         ProductDTO prd = gson.fromJson(requestBody, ProductDTO.class);
 
-        this.productRepositoryImpl.updateProduct(prd);
+        try {
+            this.productRepositoryImpl.updateProduct(prd);
 
-        response1 = new ResponseDTO("success","");
-        out.print(gson.toJson(response1));
-        out.flush();
+            response1 = new ResponseDTO("success", "");
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch(SQLException er){
+            response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
+        }
     }
 
     @Override
@@ -121,12 +140,16 @@ public class ProductAPI extends HttpServlet {
         ResponseDTO response1;
         Gson gson = new Gson();
 
-        this.productRepositoryImpl.deleteProduct(request.getParameter("productCode"));
-
-        response1 = new ResponseDTO("success","");
-
-        out.print(gson.toJson(response1));
-        out.flush();
+        try {
+            this.productRepositoryImpl.deleteProduct(request.getParameter("productCode"));
+            response1 = new ResponseDTO("success", "");
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch (SQLException er){
+            response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
+        }
     }
 
 

@@ -13,16 +13,12 @@ public class UserRepositoryImpl implements UserRepository {
         queryExecutor = new DatabaseQueryExecutor();
     }
 
-    public boolean authenticateUser(User user) {
-        try {
-            String query = "SELECT * FROM users WHERE username = ? AND password = ?";
-            ResultSet resultSet = queryExecutor.executeQuery(query, user.getUserName(), user.getPassword());
+    public boolean authenticateUser(User user) throws SQLException {
 
-            return resultSet.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Handle the exception according to your application's requirements
-        }
-        return false;
+        String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+        ResultSet resultSet = queryExecutor.executeQuery(query, user.getUserName(), user.getPassword());
+
+        return resultSet.next();
+
     }
 }

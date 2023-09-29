@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
 
 public class AllProductsAPI extends HttpServlet {
@@ -26,15 +27,26 @@ public class AllProductsAPI extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
-
-        List<ProductDTO> prdList = this.productRepositoryImpl.getAllProducts();
-
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-d H:mm:ss") // setting date format
                 .create();
-        ResponseDTO response1 = new ResponseDTO("success",gson.toJson(prdList));
-        out.print(gson.toJson(response1));
-        out.flush();
 
+        try {
+            List<ProductDTO> prdList = this.productRepositoryImpl.getAllProducts();
+
+            ResponseDTO response1 = new ResponseDTO("success", gson.toJson(prdList));
+            out.print(gson.toJson(response1));
+            out.flush();
+        }catch(SQLException er){
+            ResponseDTO response1 = new ResponseDTO("error", er.getMessage());
+            out.print(gson.toJson(response1));
+            out.flush();
+        }
+
+//        error test
+//
+//        ResponseDTO response1 = new ResponseDTO("error", "test");
+//        out.print(gson.toJson(response1));
+//        out.flush();
     }
 }
