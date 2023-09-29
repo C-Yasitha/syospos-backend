@@ -46,4 +46,15 @@
         <url-pattern>/grn</url-pattern>
     </servlet-mapping>
 
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>InvoiceAPI</servlet-name>
+        <servlet-class>org.example.api.InvoiceAPI</servlet-class>
+    </servlet>
+    <!-- Servlet Mappings -->
+    <servlet-mapping>
+        <servlet-name>InvoiceAPI</servlet-name>
+        <url-pattern>/invoice</url-pattern>
+    </servlet-mapping>
+
 </web-app>
